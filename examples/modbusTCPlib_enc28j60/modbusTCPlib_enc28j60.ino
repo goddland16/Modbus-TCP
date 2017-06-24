@@ -1,4 +1,27 @@
-#define UIPETHERNET_DEBUG_CLIENT 1
+/*
+  This is Modbus test code to demonstrate all the Modbus functions with 
+  with Ethernet IC ENC28J60
+  
+  ModbusTCP is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  ModbusTCP is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with ModbusTCP.  If not, see <http://www.gnu.org/licenses/>.
+  
+  Adopted from ModbusMaster for RTU over RS-485 by Doc Walker
+  Modified by Narendra Dehury for TCP.
+  copyright @ phoenixrobotix.com
+  
+*/
+#define ENC28J60     = 1
+
 unsigned int param_value_int[7];
 #include <UIPEthernet.h>
 #include <avr/wdt.h>
