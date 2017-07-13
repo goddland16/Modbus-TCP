@@ -105,7 +105,7 @@ void loop()
   node.writeMultipleCoils(20, 16);                 // Write multiple coils
   delay(500);
   result = node.readCoils(20, 18);
-  int len = node.getResponseBufferLength();
+  len = node.getResponseBufferLength();
   Serial.println("Response Length: " + String(len));
   Serial.println(node.getResponseBuffer(0), BIN);
 
