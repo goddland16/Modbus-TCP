@@ -11,6 +11,7 @@ This library has been tested with an Arduino [Mega](https://www.arduino.cc/en/Ma
 
 1. Wizent W5100 - [Ethernet library](https://www.arduino.cc/en/Reference/Ethernet).
 2. ENC28J60 - [UIPEthernet library](https://github.com/UIPEthernet/UIPEthernet).
+3. ESP8266 - [ESP8266 library](https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266WiFi/src/ESP8266WiFi.h).
 
 Note: It can be made compatible with Wiznet W5500 model, by adding new [Ethernet2 library](https://github.com/adafruit/Ethernet2) in the header file.
 
@@ -19,7 +20,8 @@ Settings
 Depending on the ic used set the following Macros.
 
 1. define WIZNET_W5100 = 0
-2. define ENC28J60     = 1
+2. define ENC28J60     = 0
+3. define ESP8266      = 1
 
 Features
 --------
