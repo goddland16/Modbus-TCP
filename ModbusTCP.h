@@ -33,6 +33,8 @@ Arduino library for communicating with Modbus server over Ethernet in TCP.
   Adopted from ModbusMaster for RTU over RS-485 by Doc Walker
   
   Modified by Narendra Dehury for TCP.
+
+  Modified by Florian K for ESP8266.
   
   Copyright @ phoenixrobotix.com
   
@@ -43,8 +45,8 @@ Arduino library for communicating with Modbus server over Ethernet in TCP.
 #define Modbus_TCPIP_h
 
 #define WIZNET_W5100  0       /**< define 1 if  WIZNET W5100 IC is used, otherwise 0 */
-#define ENC28J60      1       /**< define 1 if  ENC28J60 IC is used, otherwisw 0     */
-
+#define ENC28J60      0       /**< define 1 if  ENC28J60 IC is used, otherwise 0     */
+#define ESP8266       1
 
 
 /* _____STANDARD INCLUDES____________________________________________________ */
@@ -63,6 +65,10 @@ Arduino library for communicating with Modbus server over Ethernet in TCP.
 
 #if ENC28J60
 #include <UIPEthernet.h>
+#endif
+
+#if ESP8266
+#include <WiFiClient.h>
 #endif
 
 
@@ -86,6 +92,8 @@ class ModbusTCP
     EthernetClient ModbusClient;
 #elif ENC28J60
     UIPClient ModbusClient;
+#elif ESP8266
+    WiFiClient ModbusClient;
 #endif
 
     char MBconnectionFlag = 0;
