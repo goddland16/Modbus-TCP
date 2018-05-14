@@ -24,6 +24,7 @@ Arduino library for communicating with Modbus server over Ethernet in TCP.
   
   Adopted from ModbusMaster for RTU over RS-485 by Doc Walker
   Modified by Narendra Dehury for TCP.
+  Modified by Florian K for ESP8266.
   copyright @ phoenixrobotix.com
   
 */
@@ -583,6 +584,8 @@ uint8_t ModbusTCP::ModbusMasterTransaction(uint8_t u8MBFunction)
   if(!ModbusClient.connected()) {         // fOR w5100
 #elif ENC28J60
   if(!MBconnectionFlag) {                 // For ENC28J60
+#elif ESP8266
+  if (!ModbusClient.connected()) {        // for esp8266
 #endif
     Serial.print(F("Trying to connect..."));
     MBconnectionFlag = 0;
@@ -602,9 +605,11 @@ uint8_t ModbusTCP::ModbusMasterTransaction(uint8_t u8MBFunction)
   else
     Serial.println(F("Already Connected to Server!!"));
 
-
+#ifdef ESP8266
+  ModbusClient.write(&u8ModbusADU[0], u8ModbusADUSize);
+#else
   ModbusClient.write(u8ModbusADU, u8ModbusADUSize);
-  
+#endif
   u8ModbusADUSize = 0;
   // loop until we run out of time or bytes, or an error occurs
   u32StartTime = millis();
@@ -659,8 +664,11 @@ uint8_t ModbusTCP::ModbusMasterTransaction(uint8_t u8MBFunction)
 #if WIZNET_W5100  
   ModbusClient.stop();
   Serial.println("WIZNET W5100 : Stopping");
-#else
+#elif ENC28J60
   Serial.println("ENC28J60 : Not Stopping");
+#elif ESP8266
+  ModbusClient.stop();
+  Serial.println("ESP8266 : Stopping");
 #endif
 
 

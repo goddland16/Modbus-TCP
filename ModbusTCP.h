@@ -12,39 +12,44 @@ Arduino library for communicating with Modbus server over Ethernet in TCP.
 \mainpage Modbus over TCP/IP
   ModbusTCP.h - Arduino library for communicating with Modbus server
   over Ethernet (via TCP protocol).
-  
+
   This file is part of ModbusTCP.
 
   @see **README** for details.
-  
+
   ModbusTCP is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   ModbusTCP is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with ModbusTCP library. If not, see <http://www.gnu.org/licenses/>.
-  
+
   Adopted from ModbusMaster for RTU over RS-485 by Doc Walker
-  
+
   Modified by Narendra Dehury for TCP.
-  
+
+  Modified by Florian K for ESP8266.
+
   Copyright @ phoenixrobotix.com
-  
+
 */
 
-  
+
 #ifndef Modbus_TCPIP_h
 #define Modbus_TCPIP_h
 
+#ifndef WIZNET_W5100
 #define WIZNET_W5100  0       /**< define 1 if  WIZNET W5100 IC is used, otherwise 0 */
-#define ENC28J60      1       /**< define 1 if  ENC28J60 IC is used, otherwisw 0     */
-
+#ifndef ENC28J60
+#define ENC28J60      0       /**< define 1 if  ENC28J60 IC is used, otherwise 0     */
+#ifndef ESP8266
+#define ESP8266       1
 
 
 /* _____STANDARD INCLUDES____________________________________________________ */
@@ -65,6 +70,10 @@ Arduino library for communicating with Modbus server over Ethernet in TCP.
 #include <UIPEthernet.h>
 #endif
 
+#if ESP8266
+#include <WiFiClient.h>
+#endif
+
 
 /* _____PROJECT INCLUDES_____________________________________________________ */
 
@@ -79,13 +88,15 @@ Arduino class library for communicating with Modbus server over TCP/IP.
 class ModbusTCP
 {
   public:
-    
+
     IPAddress serverIP;
 
-#if WIZNET_W5100    
+#if WIZNET_W5100
     EthernetClient ModbusClient;
 #elif ENC28J60
     UIPClient ModbusClient;
+#elif ESP8266
+    WiFiClient ModbusClient;
 #endif
 
     char MBconnectionFlag = 0;
@@ -96,11 +107,11 @@ class ModbusTCP
     void setTransactionID(uint16_t);
     void setServerIPAddress(IPAddress);
     void idle(void (*)());
-    
+
     // Modbus exception codes
     /**
     Modbus protocol illegal function exception.
-    
+
     The function code received in the query is not an allowable action for
     the server. This may be because the function code is only
     applicable to newer devices, and was not implemented in the unit
@@ -114,46 +125,46 @@ class ModbusTCP
 
     /**
     Modbus protocol illegal data address exception.
-    
-    The data address received in the query is not an allowable address for 
-    the server. More specifically, the combination of reference 
-    number and transfer length is invalid. For a controller with 100 
-    registers, the ADU addresses the first register as 0, and the last one 
-    as 99. If a request is submitted with a starting register address of 96 
-    and a quantity of registers of 4, then this request will successfully 
-    operate (address-wise at least) on registers 96, 97, 98, 99. If a 
-    request is submitted with a starting register address of 96 and a 
-    quantity of registers of 5, then this request will fail with Exception 
-    Code 0x02 "Illegal Data Address" since it attempts to operate on 
-    registers 96, 97, 98, 99 and 100, and there is no register with address 
-    100. 
+
+    The data address received in the query is not an allowable address for
+    the server. More specifically, the combination of reference
+    number and transfer length is invalid. For a controller with 100
+    registers, the ADU addresses the first register as 0, and the last one
+    as 99. If a request is submitted with a starting register address of 96
+    and a quantity of registers of 4, then this request will successfully
+    operate (address-wise at least) on registers 96, 97, 98, 99. If a
+    request is submitted with a starting register address of 96 and a
+    quantity of registers of 5, then this request will fail with Exception
+    Code 0x02 "Illegal Data Address" since it attempts to operate on
+    registers 96, 97, 98, 99 and 100, and there is no register with address
+    100.
 
     @ingroup constant
     */
     static const uint8_t MBIllegalDataAddress         = 0x02;
-    
+
     /**
     Modbus protocol illegal data value exception.
-    
-    A value contained in the query data field is not an allowable value for 
-    server. This indicates a fault in the structure of the 
-    remainder of a complex request, such as that the implied length is 
-    incorrect. It specifically does NOT mean that a data item submitted for 
-    storage in a register has a value outside the expectation of the 
-    application program, since the MODBUS protocol is unaware of the 
+
+    A value contained in the query data field is not an allowable value for
+    server. This indicates a fault in the structure of the
+    remainder of a complex request, such as that the implied length is
+    incorrect. It specifically does NOT mean that a data item submitted for
+    storage in a register has a value outside the expectation of the
+    application program, since the MODBUS protocol is unaware of the
     significance of any particular value of any particular register.
-    
+
     @ingroup constant
     */
     static const uint8_t MBIllegalDataValue              = 0x03;
     //static const uint8_t MBIllegalResponseLength         = 0x04;
-    
+
     /**
     Modbus TCP server connection failure exception.
-    
+
     An unrecoverable error occurred while the client is attempting to connect to
     the server but fails, Usually a case with ENC82J60.
-    
+
     @ingroup constant
     */
 
@@ -162,62 +173,62 @@ class ModbusTCP
     // Class-defined success/exception codes
     /**
     ModbusTCP success.
-    
+
     Modbus transaction was successful; the following checks were valid:
       - slave ID
       - function code
       - response code
       - data
-    
+
     @ingroup constant
     */
     static const uint8_t MBSuccess                     = 0x00;
-    
+
     /**
     ModbusTCP invalid response slave ID exception.
-    
+
     The slave ID in the response does not match that of the request.
-    
+
     @ingroup constant
     */
     static const uint8_t MBInvalidTransactionID        = 0xE0;
-    
+
     /**
     ModbusTCP invalid response function exception.
-    
+
     The function code in the response does not match that of the request.
-    
+
     @ingroup constant
     */
     static const uint8_t MBInvalidFunction             = 0xE1;
-    
+
     /**
     ModbusTCP response timed out exception.
-    
-    The entire response was not received within the timeout period, 
-    ModbusTCP::MBResponseTimeout. 
-    
+
+    The entire response was not received within the timeout period,
+    ModbusTCP::MBResponseTimeout.
+
     @ingroup constant
     */
     static const uint8_t MBResponseTimedOut            = 0xE2;
-    
+
     /**
     ModbusTCP invalid response CRC exception.
-    
+
     The CRC in the response does not match the one calculated.
-    
+
     @ingroup constant
     */
     static const uint8_t MBInvalidUnitID               = 0xE3;
     static const uint8_t MBInvalidProtocol             = 0xE4;
 
-    uint8_t  getResponseBufferLength();    
+    uint8_t  getResponseBufferLength();
     uint16_t getResponseBuffer(uint8_t);
     void     clearResponseBuffer();
     uint8_t  setTransmitBuffer(uint8_t, uint16_t);
     void     clearTransmitBuffer();
-  
-    
+
+
     uint8_t  readCoils(uint16_t, uint16_t);
     uint8_t  readDiscreteInputs(uint16_t, uint16_t);
     uint8_t  readHoldingRegisters(uint16_t, uint16_t);
@@ -228,10 +239,10 @@ class ModbusTCP
     uint8_t  writeMultipleRegisters(uint16_t, uint16_t);
     uint8_t  maskWriteRegister(uint16_t, uint16_t, uint16_t);
     uint8_t  readWriteMultipleRegisters(uint16_t, uint16_t, uint16_t, uint16_t);
-    
+
   private:
 
-    uint8_t  _u8MBUnitID;                                        ///< Unit Identifier for individual unit-identification 
+    uint8_t  _u8MBUnitID;                                        ///< Unit Identifier for individual unit-identification
     uint16_t _u16MBTransactionID                      = 1;       ///< Transaction id for each transaction
     uint16_t _u16MBProtocolID                         = 0;       ///< Constant
     static const uint8_t MaxBufferSize                = 64;      ///< size of response/transmit buffers
@@ -241,7 +252,7 @@ class ModbusTCP
     uint16_t _u16WriteAddress;                                   ///< slave register to which to write
     uint16_t _u16WriteQty;                                       ///< quantity of words to write
     uint8_t _u8ResponseBufferLength;
-    
+
     // Modbus function codes for bit access
     static const uint8_t MBReadCoils                  = 0x01; ///< Modbus function 0x01 Read Coils
     static const uint8_t MBReadDiscreteInputs         = 0x02; ///< Modbus function 0x02 Read Discrete Inputs
@@ -255,13 +266,13 @@ class ModbusTCP
     static const uint8_t MBWriteMultipleRegisters     = 0x10; ///< Modbus function 0x10 Write Multiple Registers
     static const uint8_t MBMaskWriteRegister          = 0x16; ///< Modbus function 0x16 Mask Write Register
     static const uint8_t MBReadWriteMultipleRegisters = 0x17; ///< Modbus function 0x17 Read Write Multiple Registers
-    
+
 
     static const uint16_t ku16MBResponseTimeout          = 2000; ///< Modbus timeout [milliseconds]
-    
+
     // master function that conducts Modbus transactions
     uint8_t ModbusMasterTransaction(uint8_t u8MBFunction);
-    
+
     // idle callback function; gets called during idle time between TX and RX
     void (*_idle)();
 };
